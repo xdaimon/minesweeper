@@ -5,8 +5,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11")
 
 set(SOURCE_FILES main.cpp)
 
-# set(CMAKE_AUTOMOC on)
-# find_package(Qt5Widgets)
 find_package(FLTK)
 
 include_directories(.)
@@ -18,5 +16,4 @@ link_directories(
 add_executable(main ${SOURCE_FILES})
 
 target_link_libraries(main pthread ${FLTK_LIBRARIES})
-# target_link_libraries(main pthread Qt5::Widgets)
 
