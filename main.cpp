@@ -13,7 +13,7 @@ using std::vector;
 #include <Fl/Fl_Widget.H>
 #include <FL/Enumerations.H>
 
-//#define VISUALIZE
+#define VISUALIZE
 
 const static int sz = 32;
 
@@ -84,20 +84,27 @@ void print_vector(vector<int>& a, int sqr) {
 	}
 }
 
+void clickSquare(int indx, vector<int>& board, vector<int>& covered, vector<patch*>& grid, Fl_Window* w) {
+	covered[indx] = 0;
+	grid[indx]->setBoxDown();
+	if (board[indx] > 0)
+		grid[indx]->setLabel(std::to_string(board[indx]).c_str());
+#ifdef VISUALIZE
+	w->redraw();
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	Fl::wait();
+#endif
+}
+
 void uncover(int x, int y, vector<int>& board, vector<int>& covered, vector<patch*>& grid, Fl_Window* w) {
 	size_t indx = index(x,y);
+
+	// Reveal number of surrounding mines to user
+	clickSquare(indx, board, covered, grid, w);
+
+	// If we clicked a square with no surrounding mines, then
 	if (board[indx] == 0) {
-		// mark as read
-		covered[indx] = 0;
-		grid[indx]->setBoxDown();
-		if (board[indx] > 0)
-			grid[indx]->setLabel(std::to_string(board[indx]).c_str());
-#ifdef VISUALIZE
-		w->redraw();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		Fl::wait();
-#endif
-		// go to each surrounding zero
+		// uncover each surrounding square that is not a mine
 		for (int i = -1; i <= 1; ++i) {
 			for (int j = -1; j <= 1; ++j) {
 				int X = x;
@@ -107,33 +114,10 @@ void uncover(int x, int y, vector<int>& board, vector<int>& covered, vector<patc
 				if (y+j >= 0 && y+j < sz)
 					Y=y+j;
 				indx = index(X,Y);
-				if (covered[indx] && board[indx] >= 0) {
-
-					covered[indx] = 0;
-					grid[indx]->setBoxDown();
-					if (board[indx] > 0)
-						grid[indx]->setLabel(std::to_string(board[indx]).c_str());
-#ifdef VISUALIZE
-					w->redraw();
-					std::this_thread::sleep_for(std::chrono::milliseconds(10));
-					Fl::wait();
-#endif
-
+				if (covered[indx] && board[indx] >= 0)
 					uncover(X,Y, board, covered, grid, w);
-				}
 			}
 		}
-	} else {
-		covered[indx] = 0;
-		grid[indx]->setBoxDown();
-		if (board[indx] > 0)
-			grid[indx]->setLabel(std::to_string(board[indx]).c_str());
-#ifdef VISUALIZE
-		w->redraw();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		Fl::wait();
-#endif
-		return;
 	}
 }
 
